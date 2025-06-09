@@ -141,12 +141,16 @@ def add_ssh_keys(
             try:
                 ssh_dir = os.path.expanduser("~/.ssh")
                 os.makedirs(ssh_dir, exist_ok=True)
-                file_path = os.path.join(ssh_dir, item["name"]+".pub",)
+                file_path = os.path.join(
+                    ssh_dir,
+                    item["name"] + ".pub",
+                )
                 with open(file_path, "w") as f:
                     f.write(public_key)
-                logging.info('Public key written to %s', file_path)
+                os.chmod(file_path, 0o644)
+                logging.info("Public key written to %s", file_path)
             except IOError as e:
-                logging.error('Failed to write public key to file: %s', str(e))
+                logging.error("Failed to write public key to file: %s", str(e))
 
 
 def fetch_key(session: str, item: dict[str, Any], keyname: str) -> str:
@@ -330,7 +334,9 @@ if __name__ == "__main__":
             items = folder_items(session, folder_id)
 
             logging.info("Attempting to add keys to ssh-agent")
-            add_ssh_keys(session, items, args.customfield, args.passphrasefield, args.publicfield)
+            add_ssh_keys(
+                session, items, args.customfield, args.passphrasefield, args.publicfield
+            )
         except RuntimeError as error:
             logging.critical(str(error))
         except subprocess.CalledProcessError as error:
